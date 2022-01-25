@@ -10,13 +10,13 @@
 # Precompiled Headers
 *.gch
 *.pch
-build
 out
 # Compiled Dynamic libraries
 *.so
 *.dylib
 *.dll
-
+build
+*.onnx
 # Fortran module files
 *.mod
 *.smod
