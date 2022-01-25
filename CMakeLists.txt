@@ -8,11 +8,12 @@ find_package(protobuf REQUIRED)
 include_directories(
     /usr/local/include
     ${Protobuf_INCLUDE_DIRS}
-    onnx
+    protobuf
     include
+    onnx
 )
 file(GLOB CPPS src/*.cpp)
 message(${Protobuf_LIBRARIES})
 add_definitions(-DHAVE_PROTOBUF)
-add_executable(main main.cpp ${CPPS} onnx/opencv-onnx.pb.cc )
+add_executable(main main.cpp ${CPPS} protobuf/opencv-onnx.pb.cc )
 target_link_libraries(main  ${Protobuf_LIBRARIES} ${OpenCV_LIBS})

@@ -61,20 +61,7 @@ namespace cv
                 return maybeDebugNet;
             }
 
-            class LayerHandler
-            {
-            public:
-                void addMissing(const std::string &name, const std::string &type);
-                bool contains(const std::string &type) const;
-                void printMissing();
-
-            protected:
-                LayerParams getNotImplementedParams(const std::string &name, const std::string &op);
-
-            private:
-                std::unordered_map<std::string, std::unordered_set<std::string>> layers;
-            };
-
+            
             struct NetImplBase
             {
                 const int networkId;    // network global identifier
