@@ -1,3 +1,0 @@
-C:/Users/mix/source/repos/ONNX-Debug/out/build/x64-debug/CMakeFiles/edit_cache.dir
-C:/Users/mix/source/repos/ONNX-Debug/out/build/x64-debug/CMakeFiles/main.dir
-C:/Users/mix/source/repos/ONNX-Debug/out/build/x64-debug/CMakeFiles/rebuild_cache.dir
