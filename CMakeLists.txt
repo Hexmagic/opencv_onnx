@@ -1,6 +1,7 @@
 ﻿cmake_minimum_required (VERSION 3.8)
 
 project ("ONNX-Debug")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=deprecated-declarations -Wno-deprecated-declarations")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 find_package(OpenCV REQUIRED)
@@ -15,5 +16,5 @@ include_directories(
 file(GLOB CPPS src/*.cpp)
 message(${Protobuf_LIBRARIES})
 add_definitions(-DHAVE_PROTOBUF)
-add_executable(main main.cpp ${CPPS} protobuf/opencv-onnx.pb.cc )
+add_executable(main main.cpp  protobuf/opencv-onnx.pb.cc  )
 target_link_libraries(main  ${Protobuf_LIBRARIES} ${OpenCV_LIBS})

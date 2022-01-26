@@ -38,7 +38,8 @@
 // the use of this software, even if advised of the possibility of such damage.
 //
 //M*/
-
+#ifndef __PRECOMP_HPP
+#define __PRECOMP_HPP
 #include <opencv2/core.hpp>
 #include "cvconfig.h"
 
@@ -74,4 +75,5 @@
 #include <opencv2/dnn/all_layers.hpp>
 #include <opencv2/dnn/shape_utils.hpp>
 
-#include "dnn_common.hpp"
+
+#endif //

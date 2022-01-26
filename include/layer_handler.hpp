@@ -3,8 +3,8 @@
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <set>
+#include "utils.hpp"
 #include <opencv2/dnn.hpp>
-#include "onnx_graph_simplifier.hpp"
 using namespace cv;
 using namespace cv::dnn;
 class LayerHandler
@@ -20,6 +20,11 @@ protected:
 private:
     std::unordered_map<std::string, std::unordered_set<std::string>> layers;
 };
+static Mutex& getInitializationMutex()
+        {
+            static Mutex initializationMutex;
+            return initializationMutex;
+        }
 
 Mutex &getLayerFactoryMutex()
 {
