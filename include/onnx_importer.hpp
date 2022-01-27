@@ -69,6 +69,7 @@ class ONNXImporter
 {
 public:
     bool DNN_DIAGNOSTICS_RUN = 1;
+    
     Mat getBlob(const opencv_onnx::NodeProto &node_proto, int index);
     Mat getBlob(const std::string &input_name);
 
@@ -171,6 +172,7 @@ public:
     const DispatchMap dispatch;
     static const ONNXImporter::DispatchMap buildDispatchMap();
     ONNXImporter(Net &net, const char *onnxFile);
+    ONNXImporter(Net& net, const char* buffer, size_t sizeBuffer);
     void populateNet();
     std::map<std::string, Mat> getGraphTensors(
         const opencv_onnx::GraphProto &graph_proto);
@@ -223,6 +225,31 @@ void ONNXLayerHandler::fillRegistry(const opencv_onnx::GraphProto &net)
         }
     }
     printMissing();
+}
+
+
+ONNXImporter::ONNXImporter(Net& net, const char* buffer, size_t sizeBuffer)
+    : layerhandler(new ONNXLayerHandler(this)), dstNet(net), dispatch(buildDispatchMap())
+{
+    hasDynamicShapes = false;
+    CV_LOG_DEBUG(NULL, "DNN/ONNX: processing in-memory ONNX model (" << sizeBuffer << " bytes)");
+
+    struct _Buf : public std::streambuf
+            {
+        _Buf(const char* buffer, size_t sizeBuffer)
+        {
+            char* p = const_cast<char*>(buffer);
+            setg(p, p, p + sizeBuffer);
+        }
+            };
+
+    _Buf buf(buffer, sizeBuffer);
+    std::istream input(&buf);
+
+    if (!model_proto.ParseFromIstream(&input))
+        CV_Error(Error::StsUnsupportedFormat, "Failed to parse onnx model from in-memory byte array.");
+
+    populateNet();
 }
 
 ONNXImporter::ONNXImporter(Net &net, const char *onnxFile)
@@ -584,7 +611,7 @@ void ONNXImporter::handleNode(const opencv_onnx::NodeProto &node_proto)
     CV_Assert(node_proto.output_size() >= 1);
     std::string name = node_proto.output(0);
     const std::string &layer_type = node_proto.op_type();
-    CV_LOG_INFO(NULL, "DNN/ONNX: processing node with " << node_proto.input_size() << " inputs and " << node_proto.output_size() << " outputs: "
+    CV_LOG_DEBUG(NULL, "DNN/ONNX: processing node with " << node_proto.input_size() << " inputs and " << node_proto.output_size() << " outputs: "
                                                          << cv::format("[%s]:(%s)", layer_type.c_str(), name.c_str()));
     LayerParams layerParams;
     try
@@ -2945,4 +2972,33 @@ void ONNXImporter::parseQConcat(LayerParams &layerParams, const opencv_onnx::Nod
     addLayer(layerParams, node_proto);
 }
 
+
+template <typename Importer, typename ... Args>
+Net readNet(Args&& ... args)
+{
+    Net net;
+    Importer importer(net, std::forward<Args>(args)...);
+    return net;
+}
+template <typename Importer, typename ... Args>
+Net readNetDiagnostic(Args&& ... args)
+{
+    Net maybeDebugNet = readNet<Importer>(std::forward<Args>(args)...);   
+    return maybeDebugNet;
+}
+
+Net readONNX(const String& onnxFile)
+{
+    return readNetDiagnostic<ONNXImporter>(onnxFile.c_str());
+}
+
+Net readONNX(const char* buffer, size_t sizeBuffer)
+{
+    return readNetDiagnostic<ONNXImporter>(buffer, sizeBuffer);
+}
+
+Net readONNX(const std::vector<uchar>& buffer)
+{
+    return readONNX(reinterpret_cast<const char*>(buffer.data()), buffer.size());
+}
 #endif //
